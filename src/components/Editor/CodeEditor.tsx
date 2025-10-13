@@ -1,89 +1,77 @@
 import { useEffect, useRef } from "react";
-import { EditorView, keymap } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from "@codemirror/view";
+import { EditorState, Compartment } from "@codemirror/state";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { 
   syntaxHighlighting, 
   defaultHighlightStyle,
   bracketMatching,
   foldGutter,
-  foldKeymap
+  foldKeymap,
+  indentOnInput
 } from "@codemirror/language";
 import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { lintKeymap } from "@codemirror/lint";
-import { oneDark } from "@codemirror/theme-one-dark";
 import { getLanguageExtension } from "./languageSupport";
+import { getTheme, createCustomTheme } from "./themes";
+import { EditorSettings } from "@/types/settings";
 
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   language: string;
+  settings: EditorSettings;
 }
 
-export const CodeEditor = ({ value, onChange, language }: CodeEditorProps) => {
+export const CodeEditor = ({ value, onChange, language, settings }: CodeEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
   useEffect(() => {
     if (!editorRef.current) return;
 
+    const extensions = [
+      settings.lineWrapping ? EditorView.lineWrapping : [],
+      history(),
+      settings.foldGutter ? foldGutter() : [],
+      settings.bracketMatching ? bracketMatching() : [],
+      settings.autoCloseBrackets ? closeBrackets() : [],
+      settings.autocompletion ? autocompletion() : [],
+      highlightSelectionMatches(),
+      syntaxHighlighting(defaultHighlightStyle),
+      indentOnInput(),
+      settings.highlightActiveLine ? highlightActiveLine() : [],
+      settings.highlightActiveLine ? highlightActiveLineGutter() : [],
+      settings.lineNumbers ? lineNumbers() : [],
+      getTheme(settings.theme),
+      createCustomTheme(
+        settings.fontSize,
+        settings.fontFamily,
+        settings.lineHeight,
+        settings.smoothCursor
+      ),
+      getLanguageExtension(language),
+      keymap.of([
+        ...defaultKeymap,
+        ...historyKeymap,
+        ...foldKeymap,
+        ...completionKeymap,
+        ...closeBracketsKeymap,
+        ...searchKeymap,
+        ...lintKeymap,
+        indentWithTab,
+      ]),
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) {
+          onChange(update.state.doc.toString());
+        }
+      }),
+    ];
+
     const state = EditorState.create({
       doc: value,
-      extensions: [
-        EditorView.lineWrapping,
-        history(),
-        foldGutter(),
-        bracketMatching(),
-        closeBrackets(),
-        autocompletion(),
-        highlightSelectionMatches(),
-        syntaxHighlighting(defaultHighlightStyle),
-        oneDark,
-        getLanguageExtension(language),
-        keymap.of([
-          ...defaultKeymap,
-          ...historyKeymap,
-          ...foldKeymap,
-          ...completionKeymap,
-          ...closeBracketsKeymap,
-          ...searchKeymap,
-          ...lintKeymap,
-        ]),
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            onChange(update.state.doc.toString());
-          }
-        }),
-        EditorView.theme({
-          "&": {
-            height: "100%",
-            fontSize: "14px",
-            fontFamily: "Fira Code, Monaco, Consolas, monospace",
-          },
-          ".cm-scroller": {
-            overflow: "auto",
-            fontFamily: "inherit",
-          },
-          ".cm-gutters": {
-            backgroundColor: "hsl(var(--editor-gutter))",
-            color: "hsl(var(--muted-foreground))",
-            border: "none",
-          },
-          ".cm-activeLineGutter": {
-            backgroundColor: "hsl(var(--editor-active-line))",
-          },
-          ".cm-activeLine": {
-            backgroundColor: "hsl(var(--editor-active-line))",
-          },
-          ".cm-selectionBackground": {
-            backgroundColor: "hsl(var(--editor-selection)) !important",
-          },
-          "&.cm-focused .cm-selectionBackground": {
-            backgroundColor: "hsl(var(--editor-selection)) !important",
-          },
-        }),
-      ],
+      extensions: extensions.flat(),
     });
 
     viewRef.current = new EditorView({
@@ -94,7 +82,7 @@ export const CodeEditor = ({ value, onChange, language }: CodeEditorProps) => {
     return () => {
       viewRef.current?.destroy();
     };
-  }, [language]);
+  }, [language, settings]);
 
   useEffect(() => {
     if (viewRef.current && value !== viewRef.current.state.doc.toString()) {

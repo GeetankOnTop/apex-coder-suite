@@ -1,10 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { CodeEditor } from "@/components/Editor/CodeEditor";
 import { EditorToolbar } from "@/components/Toolbar/EditorToolbar";
 import { FileTab } from "@/components/FileTabs/FileTab";
+import { SettingsPanel } from "@/components/Settings/SettingsPanel";
+import { NewFileDialog } from "@/components/Dialogs/NewFileDialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, FileCode2, Settings } from "lucide-react";
 import { toast } from "sonner";
+import { EditorSettings, defaultSettings } from "@/types/settings";
+import codeflowIcon from "@/assets/codeflow-icon.png";
 
 interface File {
   id: string;
@@ -13,43 +17,35 @@ interface File {
   language: string;
 }
 
-const DEFAULT_FILES: File[] = [
-  {
-    id: "1",
-    name: "app.js",
-    language: "javascript",
-    content: `// Welcome to CodeMaster - Professional Code Editor
-// Powered by CodeMirror 6
-
-function greet(name) {
-  console.log(\`Hello, \${name}! 👋\`);
-  return \`Welcome to CodeMaster!\`;
-}
-
-// Try editing this code
-const message = greet("Developer");
-console.log(message);
-
-// Features:
-// ✅ Syntax highlighting
-// ✅ Auto-completion
-// ✅ Code folding
-// ✅ Multi-language support
-// ✅ Search & replace (Ctrl+F)
-// ✅ Line numbers
-// ✅ Bracket matching
-`,
-  },
-];
-
 const Index = () => {
-  const [files, setFiles] = useState<File[]>(DEFAULT_FILES);
-  const [activeFileId, setActiveFileId] = useState<string>(DEFAULT_FILES[0].id);
+  const [files, setFiles] = useState<File[]>([]);
+  const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const [settings, setSettings] = useState<EditorSettings>(defaultSettings);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showNewFileDialog, setShowNewFileDialog] = useState(false);
 
-  const activeFile = files.find((f) => f.id === activeFileId) || files[0];
+  // Load settings from localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem("codeflow-settings");
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (e) {
+        console.error("Failed to load settings");
+      }
+    }
+  }, []);
+
+  // Save settings to localStorage
+  useEffect(() => {
+    localStorage.setItem("codeflow-settings", JSON.stringify(settings));
+  }, [settings]);
+
+  const activeFile = files.find((f) => f.id === activeFileId);
 
   const handleCodeChange = useCallback(
     (newContent: string) => {
+      if (!activeFileId) return;
       setFiles((prev) =>
         prev.map((f) => (f.id === activeFileId ? { ...f, content: newContent } : f))
       );
@@ -59,6 +55,7 @@ const Index = () => {
 
   const handleLanguageChange = useCallback(
     (newLanguage: string) => {
+      if (!activeFileId) return;
       setFiles((prev) =>
         prev.map((f) => (f.id === activeFileId ? { ...f, language: newLanguage } : f))
       );
@@ -67,11 +64,13 @@ const Index = () => {
   );
 
   const handleSave = useCallback(() => {
+    if (!activeFile) return;
     localStorage.setItem(`file-${activeFile.id}`, activeFile.content);
     toast.success("File saved successfully!");
   }, [activeFile]);
 
   const handleDownload = useCallback(() => {
+    if (!activeFile) return;
     const blob = new Blob([activeFile.content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -93,28 +92,12 @@ const Index = () => {
         reader.onload = (e) => {
           const content = e.target?.result as string;
           const extension = file.name.split(".").pop() || "txt";
-          const languageMap: Record<string, string> = {
-            js: "javascript",
-            ts: "typescript",
-            jsx: "jsx",
-            tsx: "tsx",
-            py: "python",
-            html: "html",
-            css: "css",
-            json: "json",
-            md: "markdown",
-            sql: "sql",
-            xml: "xml",
-            php: "php",
-            java: "java",
-            cpp: "cpp",
-            rs: "rust",
-          };
+          const { getLanguageFromExtension } = require("@/components/Editor/languageSupport");
           const newFile: File = {
             id: Date.now().toString(),
             name: file.name,
             content,
-            language: languageMap[extension] || "javascript",
+            language: getLanguageFromExtension(extension),
           };
           setFiles((prev) => [...prev, newFile]);
           setActiveFileId(newFile.id);
@@ -126,97 +109,157 @@ const Index = () => {
     input.click();
   }, []);
 
-  const handleNewFile = () => {
+  const handleNewFile = (fileName: string, language: string) => {
     const newFile: File = {
       id: Date.now().toString(),
-      name: `untitled-${files.length + 1}.js`,
-      content: "// New file\n",
-      language: "javascript",
+      name: fileName,
+      content: `// ${fileName}\n`,
+      language,
     };
     setFiles((prev) => [...prev, newFile]);
     setActiveFileId(newFile.id);
+    setShowNewFileDialog(false);
     toast.success("New file created!");
   };
 
   const handleCloseFile = (id: string) => {
-    if (files.length === 1) {
-      toast.error("Cannot close the last file!");
-      return;
-    }
     setFiles((prev) => prev.filter((f) => f.id !== id));
     if (activeFileId === id) {
-      setActiveFileId(files[0].id === id ? files[1].id : files[0].id);
+      const remainingFiles = files.filter((f) => f.id !== id);
+      setActiveFileId(remainingFiles.length > 0 ? remainingFiles[0].id : null);
     }
     toast.success("File closed!");
   };
 
   return (
     <div className="h-screen w-full flex flex-col bg-background overflow-hidden">
-      {/* Header */}
-      <div className="h-16 bg-gradient-primary border-b border-border flex items-center justify-between px-6 shadow-glow">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-background/10 backdrop-blur-sm flex items-center justify-center">
-            <span className="text-2xl">⚡</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">CodeMaster</h1>
-            <p className="text-xs text-white/80">Professional Code Editor</p>
-          </div>
+      {/* File Tabs & Actions */}
+      <div className="bg-card border-b border-border flex items-center justify-between">
+        <div className="flex items-center overflow-x-auto flex-1">
+          {files.length > 0 ? (
+            files.map((file) => (
+              <FileTab
+                key={file.id}
+                id={file.id}
+                name={file.name}
+                isActive={file.id === activeFileId}
+                onSelect={() => setActiveFileId(file.id)}
+                onClose={() => handleCloseFile(file.id)}
+              />
+            ))
+          ) : (
+            <div className="px-4 py-2 text-muted-foreground text-sm">No files open</div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1 px-2 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9"
+            onClick={() => setShowNewFileDialog(true)}
+            title="New File"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9"
+            onClick={() => setShowSettings(true)}
+            title="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {/* File Tabs */}
-      <div className="bg-card border-b border-border flex items-center overflow-x-auto">
-        {files.map((file) => (
-          <FileTab
-            key={file.id}
-            id={file.id}
-            name={file.name}
-            isActive={file.id === activeFileId}
-            onSelect={() => setActiveFileId(file.id)}
-            onClose={() => handleCloseFile(file.id)}
-          />
-        ))}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-10 w-10 ml-2 flex-shrink-0"
-          onClick={handleNewFile}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Toolbar */}
-      <EditorToolbar
-        language={activeFile.language}
-        onLanguageChange={handleLanguageChange}
-        onSave={handleSave}
-        onDownload={handleDownload}
-        onUpload={handleUpload}
-        fileName={activeFile.name}
-      />
-
-      {/* Editor */}
-      <div className="flex-1 overflow-hidden bg-editor-bg">
-        <CodeEditor
-          value={activeFile.content}
-          onChange={handleCodeChange}
+      {/* Toolbar - only show if file is open */}
+      {activeFile && (
+        <EditorToolbar
           language={activeFile.language}
+          onLanguageChange={handleLanguageChange}
+          onSave={handleSave}
+          onDownload={handleDownload}
+          onUpload={handleUpload}
+          fileName={activeFile.name}
         />
+      )}
+
+      {/* Editor or Empty State */}
+      <div className="flex-1 overflow-hidden bg-editor-bg">
+        {activeFile ? (
+          <CodeEditor
+            value={activeFile.content}
+            onChange={handleCodeChange}
+            language={activeFile.language}
+            settings={settings}
+          />
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center p-8">
+            <img
+              src={codeflowIcon}
+              alt="CodeFlow"
+              className="w-32 h-32 mb-6 opacity-80"
+            />
+            <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+              CodeFlow
+            </h1>
+            <p className="text-muted-foreground mb-8 max-w-md">
+              Professional code editor with multi-language support, advanced features, and full customization
+            </p>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setShowNewFileDialog(true)}
+                className="gap-2"
+              >
+                <FileCode2 className="h-4 w-4" />
+                New File
+              </Button>
+              <Button onClick={handleUpload} variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Open File
+              </Button>
+            </div>
+            <div className="mt-8 text-sm text-muted-foreground space-y-1">
+              <p>✨ 17+ languages including Lua & Luau</p>
+              <p>🎨 Multiple themes & custom fonts</p>
+              <p>⚡ Advanced features: autocomplete, folding, search</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Status Bar */}
-      <div className="h-7 bg-card border-t border-border flex items-center justify-between px-4 text-xs text-muted-foreground">
-        <div className="flex items-center gap-4">
-          <span>Lines: {activeFile.content.split("\n").length}</span>
-          <span>Characters: {activeFile.content.length}</span>
+      {/* Status Bar - only show if file is open */}
+      {activeFile && (
+        <div className="h-7 bg-card border-t border-border flex items-center justify-between px-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <span>Lines: {activeFile.content.split("\n").length}</span>
+            <span>Characters: {activeFile.content.length}</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:inline">CodeFlow</span>
+            <span>{activeFile.language.toUpperCase()}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="hidden sm:inline">CodeMirror 6</span>
-          <span>{activeFile.language.toUpperCase()}</span>
-        </div>
-      </div>
+      )}
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <SettingsPanel
+          settings={settings}
+          onSettingsChange={setSettings}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
+
+      {/* New File Dialog */}
+      {showNewFileDialog && (
+        <NewFileDialog
+          onConfirm={handleNewFile}
+          onCancel={() => setShowNewFileDialog(false)}
+        />
+      )}
     </div>
   );
 };

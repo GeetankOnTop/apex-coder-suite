@@ -57,6 +57,25 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        editor: {
+          bg: "hsl(var(--editor-bg))",
+          gutter: "hsl(var(--editor-gutter))",
+          selection: "hsl(var(--editor-selection))",
+          activeLine: "hsl(var(--editor-active-line))",
+        },
+      },
+      fontFamily: {
+        mono: ["Fira Code", "Monaco", "Consolas", "monospace"],
+      },
+      backgroundImage: {
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-accent": "var(--gradient-accent)",
+      },
+      boxShadow: {
+        glow: "var(--shadow-glow)",
+      },
+      transitionTimingFunction: {
+        smooth: "var(--transition-smooth)",
       },
       borderRadius: {
         lg: "var(--radius)",

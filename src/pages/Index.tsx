@@ -132,7 +132,7 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-background overflow-hidden">
+    <div className="h-full w-full flex flex-col bg-editor-bg overflow-hidden">
       {/* File Tabs & Actions */}
       <div className="bg-card border-b border-border flex items-center justify-between">
         <div className="flex items-center overflow-x-auto flex-1">

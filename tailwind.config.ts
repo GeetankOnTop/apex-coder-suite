@@ -65,7 +65,8 @@ export default {
         },
       },
       fontFamily: {
-        mono: ["Fira Code", "Monaco", "Consolas", "monospace"],
+        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+        mono: ["Fira Code", "JetBrains Mono", "Monaco", "Consolas", "monospace"],
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
@@ -73,6 +74,7 @@ export default {
       },
       boxShadow: {
         glow: "var(--shadow-glow)",
+        soft: "var(--shadow-soft)",
       },
       transitionTimingFunction: {
         smooth: "var(--transition-smooth)",

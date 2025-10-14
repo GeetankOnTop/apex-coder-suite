@@ -61,8 +61,8 @@ export const SettingsPanel = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-lg shadow-glow w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-editor-bg/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="bg-card border border-border rounded-xl shadow-soft w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-border flex items-center justify-between">
           <h2 className="text-2xl font-bold text-foreground">Editor Settings</h2>

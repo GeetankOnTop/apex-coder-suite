@@ -8,54 +8,55 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 15% 8%;
+    --background: 220 15% 9%;
     --foreground: 210 20% 98%;
 
-    --card: 220 15% 10%;
+    --card: 220 20% 11%;
     --card-foreground: 210 20% 98%;
 
-    --popover: 220 15% 12%;
+    --popover: 220 20% 12%;
     --popover-foreground: 210 20% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 217 91% 65%;
     --primary-foreground: 220 15% 8%;
 
-    --secondary: 280 80% 65%;
+    --secondary: 280 75% 68%;
     --secondary-foreground: 210 20% 98%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 215 15% 60%;
+    --muted: 220 15% 16%;
+    --muted-foreground: 215 15% 65%;
 
-    --accent: 170 80% 50%;
+    --accent: 170 75% 55%;
     --accent-foreground: 220 15% 8%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 65%;
     --destructive-foreground: 210 20% 98%;
 
-    --border: 220 15% 18%;
+    --border: 220 15% 20%;
     --input: 220 15% 18%;
-    --ring: 217 91% 60%;
+    --ring: 217 91% 65%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --editor-bg: 220 15% 9%;
     --editor-gutter: 220 15% 12%;
-    --editor-selection: 217 91% 60% / 0.2;
-    --editor-active-line: 220 15% 12%;
+    --editor-selection: 217 91% 65% / 0.25;
+    --editor-active-line: 220 15% 13%;
     
-    --sidebar-background: 220 15% 7%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-background: 220 15% 9%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 217 91% 65%;
     --sidebar-primary-foreground: 220 15% 8%;
-    --sidebar-accent: 220 15% 12%;
+    --sidebar-accent: 220 15% 13%;
     --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 15% 15%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 217 91% 65%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(280 80% 65%));
-    --gradient-accent: linear-gradient(135deg, hsl(170 80% 50%), hsl(217 91% 60%));
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 65% / 0.1), hsl(280 75% 68% / 0.1));
+    --gradient-accent: linear-gradient(135deg, hsl(170 75% 55% / 0.1), hsl(217 91% 65% / 0.1));
     
-    --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.3);
+    --shadow-glow: 0 4px 24px hsl(217 91% 65% / 0.15);
+    --shadow-soft: 0 2px 12px hsl(220 15% 5% / 0.25);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
@@ -65,7 +66,8 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground;
+  html, body, #root {
+    @apply bg-editor-bg text-foreground h-full w-full m-0 p-0 overflow-hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 }

@@ -35,8 +35,8 @@ export const NewFileDialog = ({ onConfirm, onCancel }: NewFileDialogProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-lg shadow-glow w-full max-w-md">
+    <div className="fixed inset-0 bg-editor-bg/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="bg-card border border-border rounded-xl shadow-soft w-full max-w-md">
         <div className="p-6 border-b border-border flex items-center justify-between">
           <h3 className="text-lg font-semibold text-foreground">New File</h3>
           <Button variant="ghost" size="icon" onClick={onCancel}>

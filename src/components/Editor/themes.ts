@@ -39,13 +39,28 @@ export const createCustomTheme = (
     "&": {
       fontSize: `${fontSize}px`,
       fontFamily: fontFamily,
+      height: "100%",
     },
     ".cm-scroller": {
       lineHeight: lineHeight.toString(),
       fontFamily: "inherit",
     },
-    ".cm-cursor": {
-      transition: smoothCursor ? "all 0.1s ease" : "none",
+    ".cm-cursor, .cm-cursor-primary": {
+      borderLeftWidth: "2px",
+      transition: smoothCursor ? "left 0.12s cubic-bezier(0.4, 0, 0.2, 1), top 0.12s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
+    },
+    ".cm-completionIcon": {
+      fontSize: "90%",
+      width: "1em",
+      marginRight: "0.5em",
+    },
+    ".cm-tooltip.cm-tooltip-autocomplete": {
+      borderRadius: "8px",
+      border: "1px solid hsl(220 15% 20%)",
+      boxShadow: "0 4px 12px hsl(220 15% 5% / 0.3)",
+    },
+    ".cm-tooltip-autocomplete ul li[aria-selected]": {
+      borderRadius: "4px",
     },
   });
 };

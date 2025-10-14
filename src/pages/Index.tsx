@@ -24,7 +24,7 @@ const Index = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showNewFileDialog, setShowNewFileDialog] = useState(false);
 
-  // Load settings from localStorage
+  // Load everything from localStorage on mount
   useEffect(() => {
     const savedSettings = localStorage.getItem("codeflow-settings");
     if (savedSettings) {
@@ -34,12 +34,40 @@ const Index = () => {
         console.error("Failed to load settings");
       }
     }
+
+    const savedFiles = localStorage.getItem("codeflow-files");
+    if (savedFiles) {
+      try {
+        const parsedFiles = JSON.parse(savedFiles);
+        setFiles(parsedFiles);
+        if (parsedFiles.length > 0) {
+          const savedActiveId = localStorage.getItem("codeflow-active-file");
+          setActiveFileId(savedActiveId || parsedFiles[0].id);
+        }
+      } catch (e) {
+        console.error("Failed to load files");
+      }
+    }
   }, []);
 
   // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem("codeflow-settings", JSON.stringify(settings));
   }, [settings]);
+
+  // Save files to localStorage
+  useEffect(() => {
+    if (files.length > 0) {
+      localStorage.setItem("codeflow-files", JSON.stringify(files));
+    }
+  }, [files]);
+
+  // Save active file ID
+  useEffect(() => {
+    if (activeFileId) {
+      localStorage.setItem("codeflow-active-file", activeFileId);
+    }
+  }, [activeFileId]);
 
   const activeFile = files.find((f) => f.id === activeFileId);
 
@@ -65,7 +93,6 @@ const Index = () => {
 
   const handleSave = useCallback(() => {
     if (!activeFile) return;
-    localStorage.setItem(`file-${activeFile.id}`, activeFile.content);
     toast.success("File saved successfully!");
   }, [activeFile]);
 
@@ -222,9 +249,9 @@ const Index = () => {
               </Button>
             </div>
             <div className="mt-8 text-sm text-muted-foreground space-y-1">
-              <p>✨ 17+ languages including Lua & Luau</p>
-              <p>🎨 Multiple themes & custom fonts</p>
-              <p>⚡ Advanced features: autocomplete, folding, search</p>
+              <p>17+ languages including Lua and Luau</p>
+              <p>Multiple themes and custom fonts</p>
+              <p>Advanced features: autocomplete, folding, search</p>
             </div>
           </div>
         )}

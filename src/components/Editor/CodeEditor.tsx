@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from "@codemirror/view";
-import { EditorState, Compartment } from "@codemirror/state";
+import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter, drawSelection } from "@codemirror/view";
+import { EditorState } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { 
   syntaxHighlighting, 
@@ -15,6 +15,7 @@ import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { lintKeymap } from "@codemirror/lint";
 import { getLanguageExtension } from "./languageSupport";
 import { getTheme, createCustomTheme } from "./themes";
+import { smoothCursor } from "./smoothCursor";
 import { EditorSettings } from "@/types/settings";
 
 interface CodeEditorProps {
@@ -32,6 +33,7 @@ export const CodeEditor = ({ value, onChange, language, settings }: CodeEditorPr
     if (!editorRef.current) return;
 
     const extensions = [
+      drawSelection(),
       settings.lineWrapping ? EditorView.lineWrapping : [],
       history(),
       settings.foldGutter ? foldGutter() : [],
@@ -50,6 +52,7 @@ export const CodeEditor = ({ value, onChange, language, settings }: CodeEditorPr
       settings.highlightActiveLine ? highlightActiveLine() : [],
       settings.highlightActiveLine ? highlightActiveLineGutter() : [],
       settings.lineNumbers ? lineNumbers() : [],
+      smoothCursor(settings.smoothCursor),
       getTheme(settings.theme),
       createCustomTheme(
         settings.fontSize,

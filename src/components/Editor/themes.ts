@@ -41,26 +41,54 @@ export const createCustomTheme = (
       fontFamily: fontFamily,
       height: "100%",
     },
+    ".cm-content": {
+      caretColor: "hsl(212 100% 68%)",
+    },
     ".cm-scroller": {
       lineHeight: lineHeight.toString(),
       fontFamily: "inherit",
     },
     ".cm-cursor, .cm-cursor-primary": {
-      borderLeftWidth: "2px",
-      transition: smoothCursor ? "left 0.12s cubic-bezier(0.4, 0, 0.2, 1), top 0.12s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
+      borderLeftColor: "hsl(212 100% 68%)",
+      borderLeftWidth: "2.5px",
+      borderLeftStyle: "solid",
+      marginLeft: "-1.25px",
+    },
+    ".cm-selectionBackground, ::selection": {
+      backgroundColor: "hsl(212 100% 68% / 0.3) !important",
+    },
+    ".cm-focused .cm-selectionBackground": {
+      backgroundColor: "hsl(212 100% 68% / 0.3) !important",
+    },
+    ".cm-activeLine": {
+      backgroundColor: "hsl(218 15% 16%)",
+    },
+    ".cm-activeLineGutter": {
+      backgroundColor: "hsl(218 15% 16%)",
     },
     ".cm-completionIcon": {
       fontSize: "90%",
-      width: "1em",
-      marginRight: "0.5em",
+      width: "1.2em",
+      marginRight: "0.6em",
+      opacity: 0.9,
     },
     ".cm-tooltip.cm-tooltip-autocomplete": {
-      borderRadius: "8px",
-      border: "1px solid hsl(220 15% 20%)",
-      boxShadow: "0 4px 12px hsl(220 15% 5% / 0.3)",
+      backgroundColor: "hsl(218 18% 15%)",
+      borderRadius: "10px",
+      border: "1px solid hsl(218 15% 25%)",
+      boxShadow: "0 8px 24px hsl(218 18% 5% / 0.4)",
+      padding: "4px",
+    },
+    ".cm-tooltip-autocomplete ul": {
+      fontFamily: "inherit",
+    },
+    ".cm-tooltip-autocomplete ul li": {
+      padding: "4px 8px",
+      borderRadius: "6px",
     },
     ".cm-tooltip-autocomplete ul li[aria-selected]": {
-      borderRadius: "4px",
+      backgroundColor: "hsl(212 100% 68% / 0.15)",
+      color: "hsl(210 20% 98%)",
     },
-  });
+  }, { dark: true });
 };

@@ -4,8 +4,9 @@ import { EditorToolbar } from "@/components/Toolbar/EditorToolbar";
 import { FileTab } from "@/components/FileTabs/FileTab";
 import { SettingsPanel } from "@/components/Settings/SettingsPanel";
 import { NewFileDialog } from "@/components/Dialogs/NewFileDialog";
+import { HtmlPreview } from "@/components/Preview/HtmlPreview";
 import { Button } from "@/components/ui/button";
-import { Plus, FileCode2, Settings } from "lucide-react";
+import { Plus, FileCode2, Settings, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { EditorSettings, defaultSettings } from "@/types/settings";
 import codeflowIcon from "@/assets/codeflow-icon.png";
@@ -23,6 +24,7 @@ const Index = () => {
   const [settings, setSettings] = useState<EditorSettings>(defaultSettings);
   const [showSettings, setShowSettings] = useState(false);
   const [showNewFileDialog, setShowNewFileDialog] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Load everything from localStorage on mount
   useEffect(() => {
@@ -70,6 +72,7 @@ const Index = () => {
   }, [activeFileId]);
 
   const activeFile = files.find((f) => f.id === activeFileId);
+  const isHtmlFile = activeFile?.language === "html" || activeFile?.name.endsWith(".html");
 
   const handleCodeChange = useCallback(
     (newContent: string) => {
@@ -180,6 +183,17 @@ const Index = () => {
         </div>
 
         <div className="flex items-center gap-1 px-2 flex-shrink-0">
+          {isHtmlFile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => setShowPreview(!showPreview)}
+              title={showPreview ? "Hide Preview" : "Show Preview"}
+            >
+              {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -214,14 +228,23 @@ const Index = () => {
       )}
 
       {/* Editor or Empty State */}
-      <div className="flex-1 overflow-hidden bg-editor-bg">
+      <div className="flex-1 overflow-hidden bg-editor-bg flex">
         {activeFile ? (
-          <CodeEditor
-            value={activeFile.content}
-            onChange={handleCodeChange}
-            language={activeFile.language}
-            settings={settings}
-          />
+          <>
+            <div className={`${showPreview && isHtmlFile ? 'w-1/2' : 'w-full'} h-full transition-all`}>
+              <CodeEditor
+                value={activeFile.content}
+                onChange={handleCodeChange}
+                language={activeFile.language}
+                settings={settings}
+              />
+            </div>
+            {showPreview && isHtmlFile && (
+              <div className="w-1/2 h-full border-l border-border">
+                <HtmlPreview content={activeFile.content} />
+              </div>
+            )}
+          </>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center p-8">
             <img

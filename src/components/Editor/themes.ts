@@ -42,29 +42,29 @@ export const createCustomTheme = (
       height: "100%",
     },
     ".cm-content": {
-      caretColor: "hsl(212 100% 68%)",
+      caretColor: "hsl(200 98% 55%)",
     },
     ".cm-scroller": {
       lineHeight: lineHeight.toString(),
       fontFamily: "inherit",
     },
     ".cm-cursor, .cm-cursor-primary": {
-      borderLeftColor: "hsl(212 100% 68%)",
+      borderLeftColor: "hsl(200 98% 55%)",
       borderLeftWidth: "2.5px",
       borderLeftStyle: "solid",
       marginLeft: "-1.25px",
     },
     ".cm-selectionBackground, ::selection": {
-      backgroundColor: "hsl(212 100% 68% / 0.3) !important",
+      backgroundColor: "hsl(200 98% 55% / 0.3) !important",
     },
     ".cm-focused .cm-selectionBackground": {
-      backgroundColor: "hsl(212 100% 68% / 0.3) !important",
+      backgroundColor: "hsl(200 98% 55% / 0.3) !important",
     },
     ".cm-activeLine": {
-      backgroundColor: "hsl(218 15% 16%)",
+      backgroundColor: "hsl(215 15% 15%)",
     },
     ".cm-activeLineGutter": {
-      backgroundColor: "hsl(218 15% 16%)",
+      backgroundColor: "hsl(215 15% 15%)",
     },
     ".cm-completionIcon": {
       fontSize: "90%",
@@ -73,10 +73,10 @@ export const createCustomTheme = (
       opacity: 0.9,
     },
     ".cm-tooltip.cm-tooltip-autocomplete": {
-      backgroundColor: "hsl(218 18% 15%)",
+      backgroundColor: "hsl(215 20% 14%)",
       borderRadius: "10px",
-      border: "1px solid hsl(218 15% 25%)",
-      boxShadow: "0 8px 24px hsl(218 18% 5% / 0.4)",
+      border: "1px solid hsl(215 15% 25%)",
+      boxShadow: "0 8px 24px hsl(215 20% 5% / 0.4)",
       padding: "4px",
     },
     ".cm-tooltip-autocomplete ul": {
@@ -87,7 +87,7 @@ export const createCustomTheme = (
       borderRadius: "6px",
     },
     ".cm-tooltip-autocomplete ul li[aria-selected]": {
-      backgroundColor: "hsl(212 100% 68% / 0.15)",
+      backgroundColor: "hsl(200 98% 55% / 0.15)",
       color: "hsl(210 20% 98%)",
     },
   }, { dark: true });

@@ -31,7 +31,21 @@ const Index = () => {
     const savedSettings = localStorage.getItem("codeflow-settings");
     if (savedSettings) {
       try {
-        setSettings(JSON.parse(savedSettings));
+        const parsed = JSON.parse(savedSettings);
+        setSettings(parsed);
+        
+        // Load custom fonts
+        if (parsed.customFonts) {
+          parsed.customFonts.forEach(async (font: { name: string; url: string }) => {
+            try {
+              const fontFace = new FontFace(font.name, `url(${font.url})`);
+              await fontFace.load();
+              document.fonts.add(fontFace);
+            } catch (e) {
+              console.error(`Failed to load font: ${font.name}`);
+            }
+          });
+        }
       } catch (e) {
         console.error("Failed to load settings");
       }

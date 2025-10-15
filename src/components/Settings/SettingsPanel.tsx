@@ -39,21 +39,45 @@ export const SettingsPanel = ({
       if (file) {
         try {
           const fontName = file.name.split(".")[0];
-          const fontURL = URL.createObjectURL(file);
+          const reader = new FileReader();
           
-          const fontFace = new FontFace(fontName, `url(${fontURL})`);
-          await fontFace.load();
-          document.fonts.add(fontFace);
+          reader.onload = async (e) => {
+            const fontData = e.target?.result as ArrayBuffer;
+            const base64 = btoa(
+              new Uint8Array(fontData).reduce(
+                (data, byte) => data + String.fromCharCode(byte),
+                ''
+              )
+            );
+            const fontURL = `data:font/woff2;base64,${base64}`;
+            
+            const fontFace = new FontFace(fontName, `url(${fontURL})`);
+            await fontFace.load();
+            document.fonts.add(fontFace);
+            
+            const customFonts = settings.customFonts || [];
+            const existingIndex = customFonts.findIndex(f => f.name === fontName);
+            
+            let updatedFonts;
+            if (existingIndex >= 0) {
+              updatedFonts = [...customFonts];
+              updatedFonts[existingIndex] = { name: fontName, url: fontURL };
+            } else {
+              updatedFonts = [...customFonts, { name: fontName, url: fontURL }];
+            }
+            
+            onSettingsChange({
+              ...settings,
+              fontFamily: fontName,
+              customFonts: updatedFonts,
+            });
+            
+            toast.success(`Font "${fontName}" loaded`);
+          };
           
-          onSettingsChange({
-            ...settings,
-            fontFamily: fontName,
-            customFont: fontURL,
-          });
-          
-          toast.success(`Font "${fontName}" loaded successfully!`);
+          reader.readAsArrayBuffer(file);
         } catch (error) {
-          toast.error("Failed to load font file");
+          toast.error("Failed to load font");
         }
       }
     };
@@ -82,10 +106,10 @@ export const SettingsPanel = ({
                 onSettingsChange({ ...settings, theme: value })
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-input border-border">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border-border">
                 {themes.map((theme) => (
                   <SelectItem key={theme.value} value={theme.value}>
                     {theme.label}
@@ -110,16 +134,21 @@ export const SettingsPanel = ({
                     onSettingsChange({ ...settings, fontFamily: value })
                   }
                 >
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="flex-1 bg-input border-border">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover">
                     <SelectItem value="Fira Code">Fira Code</SelectItem>
                     <SelectItem value="Monaco">Monaco</SelectItem>
                     <SelectItem value="Consolas">Consolas</SelectItem>
                     <SelectItem value="monospace">Monospace</SelectItem>
                     <SelectItem value="JetBrains Mono">JetBrains Mono</SelectItem>
                     <SelectItem value="Source Code Pro">Source Code Pro</SelectItem>
+                    {settings.customFonts?.map((font) => (
+                      <SelectItem key={font.name} value={font.name}>
+                        {font.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Button onClick={handleFontUpload} variant="outline">

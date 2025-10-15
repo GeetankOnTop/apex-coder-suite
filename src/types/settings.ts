@@ -1,8 +1,13 @@
+export interface CustomFont {
+  name: string;
+  url: string;
+}
+
 export interface EditorSettings {
   theme: string;
   fontSize: number;
   fontFamily: string;
-  customFont?: string;
+  customFonts?: CustomFont[];
   lineHeight: number;
   tabSize: number;
   smoothCursor: boolean;

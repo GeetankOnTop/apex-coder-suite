@@ -177,26 +177,16 @@ const Index = () => {
 
   return (
     <div className="h-full w-full flex flex-col bg-editor-bg overflow-hidden">
-      {/* File Tabs & Actions */}
-      <div className="bg-card border-b border-border flex items-center justify-between">
-        <div className="flex items-center overflow-x-auto flex-1">
-          {files.length > 0 ? (
-            files.map((file) => (
-              <FileTab
-                key={file.id}
-                id={file.id}
-                name={file.name}
-                isActive={file.id === activeFileId}
-                onSelect={() => setActiveFileId(file.id)}
-                onClose={() => handleCloseFile(file.id)}
-              />
-            ))
-          ) : (
-            <div className="px-4 py-2 text-muted-foreground text-sm">No files open</div>
-          )}
+      {/* Header with centered logo and actions */}
+      <div className="bg-card border-b border-border flex items-center justify-center px-4 py-3 gap-4">
+        <div className="flex items-center gap-3">
+          <img src={codeflowIcon} alt="CodeFlow" className="w-8 h-8" />
+          <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent">
+            CodeFlow
+          </span>
         </div>
-
-        <div className="flex items-center gap-1 px-2 flex-shrink-0">
+        
+        <div className="flex items-center gap-1">
           {isHtmlFile && (
             <Button
               variant="ghost"
@@ -228,6 +218,24 @@ const Index = () => {
           </Button>
         </div>
       </div>
+
+      {/* File Tabs - Centered */}
+      {files.length > 0 && (
+        <div className="bg-card border-b border-border flex items-center justify-center overflow-x-auto">
+          <div className="flex items-center gap-1 px-4">
+            {files.map((file) => (
+              <FileTab
+                key={file.id}
+                id={file.id}
+                name={file.name}
+                isActive={file.id === activeFileId}
+                onSelect={() => setActiveFileId(file.id)}
+                onClose={() => handleCloseFile(file.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Toolbar - only show if file is open */}
       {activeFile && (

@@ -32,6 +32,13 @@ export const CodeEditor = ({ value, onChange, language, settings }: CodeEditorPr
   useEffect(() => {
     if (!editorRef.current) return;
 
+    const customTheme = createCustomTheme(
+      settings.fontSize,
+      settings.fontFamily,
+      settings.lineHeight,
+      settings.smoothCursor
+    );
+
     const extensions = [
       drawSelection(),
       settings.lineWrapping ? EditorView.lineWrapping : [],
@@ -47,19 +54,13 @@ export const CodeEditor = ({ value, onChange, language, settings }: CodeEditorPr
         defaultKeymap: true,
       }) : [],
       highlightSelectionMatches(),
-      syntaxHighlighting(defaultHighlightStyle),
       indentOnInput(),
       settings.highlightActiveLine ? highlightActiveLine() : [],
       settings.highlightActiveLine ? highlightActiveLineGutter() : [],
       settings.lineNumbers ? lineNumbers() : [],
       smoothCursor(settings.smoothCursor),
       getTheme(settings.theme),
-      createCustomTheme(
-        settings.fontSize,
-        settings.fontFamily,
-        settings.lineHeight,
-        settings.smoothCursor
-      ),
+      ...customTheme,
       getLanguageExtension(language),
       keymap.of([
         ...defaultKeymap,

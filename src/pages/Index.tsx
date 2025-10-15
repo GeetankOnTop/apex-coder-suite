@@ -1,12 +1,13 @@
 import { useState, useCallback, useEffect } from "react";
 import { CodeEditor } from "@/components/Editor/CodeEditor";
-import { EditorToolbar } from "@/components/Toolbar/EditorToolbar";
 import { FileTab } from "@/components/FileTabs/FileTab";
 import { SettingsPanel } from "@/components/Settings/SettingsPanel";
 import { NewFileDialog } from "@/components/Dialogs/NewFileDialog";
 import { HtmlPreview } from "@/components/Preview/HtmlPreview";
+import { CodeRunner } from "@/components/CodeRunner/CodeRunner";
+import { Minimap } from "@/components/Editor/Minimap";
 import { Button } from "@/components/ui/button";
-import { Plus, FileCode2, Settings, Eye, EyeOff } from "lucide-react";
+import { Plus, FileCode2, Settings, Eye, EyeOff, Play } from "lucide-react";
 import { toast } from "sonner";
 import { EditorSettings, defaultSettings } from "@/types/settings";
 import codeflowIcon from "@/assets/codeflow-icon.png";
@@ -25,6 +26,7 @@ const Index = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showNewFileDialog, setShowNewFileDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showRunner, setShowRunner] = useState(false);
 
   // Load everything from localStorage on mount
   useEffect(() => {
@@ -87,6 +89,7 @@ const Index = () => {
 
   const activeFile = files.find((f) => f.id === activeFileId);
   const isHtmlFile = activeFile?.language === "html" || activeFile?.name.endsWith(".html");
+  const canRun = activeFile?.language === "python" || activeFile?.language === "lua" || activeFile?.language === "luau";
 
   const handleCodeChange = useCallback(
     (newContent: string) => {
@@ -107,51 +110,6 @@ const Index = () => {
     },
     [activeFileId]
   );
-
-  const handleSave = useCallback(() => {
-    if (!activeFile) return;
-    toast.success("File saved successfully!");
-  }, [activeFile]);
-
-  const handleDownload = useCallback(() => {
-    if (!activeFile) return;
-    const blob = new Blob([activeFile.content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = activeFile.name;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("File downloaded!");
-  }, [activeFile]);
-
-  const handleUpload = useCallback(() => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const content = e.target?.result as string;
-          const extension = file.name.split(".").pop() || "txt";
-          const { getLanguageFromExtension } = require("@/components/Editor/languageSupport");
-          const newFile: File = {
-            id: Date.now().toString(),
-            name: file.name,
-            content,
-            language: getLanguageFromExtension(extension),
-          };
-          setFiles((prev) => [...prev, newFile]);
-          setActiveFileId(newFile.id);
-          toast.success("File uploaded!");
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  }, []);
 
   const handleNewFile = (fileName: string, language: string) => {
     const newFile: File = {
@@ -187,6 +145,17 @@ const Index = () => {
         </div>
         
         <div className="flex items-center gap-1">
+          {canRun && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => setShowRunner(!showRunner)}
+              title={showRunner ? "Hide Runner" : "Show Runner"}
+            >
+              <Play className="h-4 w-4" />
+            </Button>
+          )}
           {isHtmlFile && (
             <Button
               variant="ghost"
@@ -237,33 +206,37 @@ const Index = () => {
         </div>
       )}
 
-      {/* Toolbar - only show if file is open */}
-      {activeFile && (
-        <EditorToolbar
-          language={activeFile.language}
-          onLanguageChange={handleLanguageChange}
-          onSave={handleSave}
-          onDownload={handleDownload}
-          onUpload={handleUpload}
-          fileName={activeFile.name}
-        />
-      )}
-
-      {/* Editor or Empty State */}
+      {/* Editor with Minimap and Runner */}
       <div className="flex-1 overflow-hidden bg-editor-bg flex">
         {activeFile ? (
           <>
-            <div className={`${showPreview && isHtmlFile ? 'w-1/2' : 'w-full'} h-full transition-all`}>
-              <CodeEditor
-                value={activeFile.content}
-                onChange={handleCodeChange}
-                language={activeFile.language}
-                settings={settings}
+            <div className={`${(showPreview && isHtmlFile) || showRunner ? 'w-1/2' : 'flex-1'} h-full flex`}>
+              <div className="flex-1">
+                <CodeEditor
+                  value={activeFile.content}
+                  onChange={handleCodeChange}
+                  language={activeFile.language}
+                  settings={settings}
+                />
+              </div>
+              <Minimap 
+                code={activeFile.content} 
+                lineHeight={settings.lineHeight}
+                fontSize={settings.fontSize}
               />
             </div>
             {showPreview && isHtmlFile && (
-              <div className="w-1/2 h-full border-l border-border">
+              <div className="w-1/2 h-full">
                 <HtmlPreview content={activeFile.content} />
+              </div>
+            )}
+            {showRunner && canRun && (
+              <div className="w-1/2 h-full">
+                <CodeRunner 
+                  code={activeFile.content}
+                  language={activeFile.language}
+                  onClose={() => setShowRunner(false)}
+                />
               </div>
             )}
           </>
@@ -278,7 +251,7 @@ const Index = () => {
               CodeFlow
             </h1>
             <p className="text-muted-foreground mb-8 max-w-md">
-              Professional code editor with multi-language support, advanced features, and full customization
+              Professional code editor with Python & Lua execution, live HTML preview, and comprehensive autocomplete
             </p>
             <div className="flex gap-3">
               <Button
@@ -288,15 +261,12 @@ const Index = () => {
                 <FileCode2 className="h-4 w-4" />
                 New File
               </Button>
-              <Button onClick={handleUpload} variant="outline" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Open File
-              </Button>
             </div>
             <div className="mt-8 text-sm text-muted-foreground space-y-1">
-              <p>17+ languages including Lua and Luau</p>
-              <p>Multiple themes and custom fonts</p>
-              <p>Advanced features: autocomplete, folding, search</p>
+              <p>17+ languages with syntax highlighting</p>
+              <p>Run Python and Lua code instantly</p>
+              <p>200+ Lua/Luau autocomplete suggestions</p>
+              <p>Code minimap for quick navigation</p>
             </div>
           </div>
         )}

@@ -5,7 +5,6 @@ import { SettingsPanel } from "@/components/Settings/SettingsPanel";
 import { NewFileDialog } from "@/components/Dialogs/NewFileDialog";
 import { HtmlPreview } from "@/components/Preview/HtmlPreview";
 import { CodeRunner } from "@/components/CodeRunner/CodeRunner";
-import { Minimap } from "@/components/Editor/Minimap";
 import { Button } from "@/components/ui/button";
 import { Plus, FileCode2, Settings, Eye, EyeOff, Play } from "lucide-react";
 import { toast } from "sonner";
@@ -233,23 +232,16 @@ const Index = () => {
         </div>
       )}
 
-      {/* Editor with Minimap and Runner */}
+      {/* Editor and Runner */}
       <div className="flex-1 overflow-hidden bg-editor-bg flex">
         {activeFile ? (
           <>
-            <div className={`${(showPreview && isHtmlFile) || showRunner ? 'w-1/2' : 'flex-1'} h-full flex transition-all duration-300`}>
-              <div className="flex-1 animate-in fade-in duration-300">
-                <CodeEditor
-                  value={activeFile.content}
-                  onChange={handleCodeChange}
-                  language={activeFile.language}
-                  settings={settings}
-                />
-              </div>
-              <Minimap 
-                code={activeFile.content} 
-                lineHeight={settings.lineHeight}
-                fontSize={settings.fontSize}
+            <div className={`${(showPreview && isHtmlFile) || showRunner ? 'w-1/2' : 'flex-1'} h-full transition-all duration-300 animate-in fade-in`}>
+              <CodeEditor
+                value={activeFile.content}
+                onChange={handleCodeChange}
+                language={activeFile.language}
+                settings={settings}
               />
             </div>
             {showPreview && isHtmlFile && (

@@ -34,6 +34,13 @@ const Index = () => {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
+        
+        // Handle device theme preference
+        if (parsed.theme === "device") {
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          parsed.theme = prefersDark ? "oneDark" : "githubLight";
+        }
+        
         setSettings(parsed);
         
         // Load custom fonts
@@ -52,6 +59,24 @@ const Index = () => {
         console.error("Failed to load settings");
       }
     }
+    
+    // Listen for device theme changes
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleThemeChange = (e: MediaQueryListEvent) => {
+      const savedSettings = localStorage.getItem("codeflow-settings");
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed.theme === "device") {
+          setSettings((prev) => ({
+            ...prev,
+            theme: e.matches ? "oneDark" : "githubLight",
+          }));
+        }
+      }
+    };
+    
+    mediaQuery.addEventListener("change", handleThemeChange);
+    return () => mediaQuery.removeEventListener("change", handleThemeChange);
 
     const savedFiles = localStorage.getItem("codeflow-files");
     if (savedFiles) {
@@ -136,13 +161,15 @@ const Index = () => {
   return (
     <div className="h-full w-full flex flex-col bg-editor-bg overflow-hidden">
       {/* Header with centered logo and actions */}
-      <div className="bg-card border-b border-border flex items-center justify-center px-4 py-3 gap-4">
-        <div className="flex items-center gap-3">
-          <img src={codeflowIcon} alt="CodeFlow" className="w-8 h-8" />
-          <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent">
-            CodeFlow
-          </span>
-        </div>
+      <div className="bg-card border-b border-border flex items-center justify-center px-4 py-3 gap-4 transition-all duration-300">
+        {!activeFile && (
+          <div className="flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <img src={codeflowIcon} alt="CodeFlow" className="w-8 h-8" />
+            <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent">
+              CodeFlow
+            </span>
+          </div>
+        )}
         
         <div className="flex items-center gap-1">
           {canRun && (
@@ -210,8 +237,8 @@ const Index = () => {
       <div className="flex-1 overflow-hidden bg-editor-bg flex">
         {activeFile ? (
           <>
-            <div className={`${(showPreview && isHtmlFile) || showRunner ? 'w-1/2' : 'flex-1'} h-full flex`}>
-              <div className="flex-1">
+            <div className={`${(showPreview && isHtmlFile) || showRunner ? 'w-1/2' : 'flex-1'} h-full flex transition-all duration-300`}>
+              <div className="flex-1 animate-in fade-in duration-300">
                 <CodeEditor
                   value={activeFile.content}
                   onChange={handleCodeChange}
@@ -226,12 +253,12 @@ const Index = () => {
               />
             </div>
             {showPreview && isHtmlFile && (
-              <div className="w-1/2 h-full">
+              <div className="w-1/2 h-full animate-in slide-in-from-right duration-300">
                 <HtmlPreview content={activeFile.content} />
               </div>
             )}
             {showRunner && canRun && (
-              <div className="w-1/2 h-full">
+              <div className="w-1/2 h-full animate-in slide-in-from-right duration-300">
                 <CodeRunner 
                   code={activeFile.content}
                   language={activeFile.language}

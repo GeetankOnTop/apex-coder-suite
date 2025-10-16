@@ -20,8 +20,7 @@ export async function runPython(code: string): Promise<{ output: string; error?:
   try {
     const pyodide = await initPython();
     
-    // Redirect stdout
-    let output = '';
+    // Redirect stdout and stderr
     pyodide.runPython(`
 import sys
 from io import StringIO
@@ -29,21 +28,36 @@ sys.stdout = StringIO()
 sys.stderr = StringIO()
     `);
     
-    // Run the user code
-    await pyodide.runPythonAsync(code);
-    
-    // Get the output
-    output = pyodide.runPython('sys.stdout.getvalue()');
-    const error = pyodide.runPython('sys.stderr.getvalue()');
-    
-    return { 
-      output: output || 'Code executed successfully',
-      error: error || undefined 
-    };
+    try {
+      // Run the user code
+      await pyodide.runPythonAsync(code);
+      
+      // Get the output
+      const output = pyodide.runPython('sys.stdout.getvalue()');
+      const errorOutput = pyodide.runPython('sys.stderr.getvalue()');
+      
+      if (errorOutput && errorOutput.trim()) {
+        return { 
+          output: output || '',
+          error: errorOutput 
+        };
+      }
+      
+      return { 
+        output: output || 'Code executed successfully (no output)',
+        error: undefined 
+      };
+    } catch (execError: any) {
+      const errorOutput = pyodide.runPython('sys.stderr.getvalue()');
+      return {
+        output: '',
+        error: errorOutput || execError.message || 'Execution error'
+      };
+    }
   } catch (error: any) {
     return {
       output: '',
-      error: error.message || 'Execution error'
+      error: `Failed to initialize Python: ${error.message || 'Unknown error'}`
     };
   }
 }

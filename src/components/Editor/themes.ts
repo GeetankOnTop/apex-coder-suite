@@ -29,6 +29,7 @@ export const themes = [
   { value: "githubLight", label: "GitHub Light" },
   { value: "githubDark", label: "GitHub Dark" },
   { value: "dracula", label: "Dracula" },
+  { value: "device", label: "Match Device" },
 ];
 
 const blueHighlightStyle = HighlightStyle.define([

@@ -19,9 +19,11 @@ export async function runLua(code: string): Promise<{ output: string; error?: st
     const { lua, lauxlib, lualib, to_jsstring } = await initLua();
     
     const L = lauxlib.luaL_newstate();
-    lualib.luaL_openlibs(L);
+    if (!L) {
+      return { output: '', error: 'Failed to create Lua state' };
+    }
     
-    let output = '';
+    lualib.luaL_openlibs(L);
     
     // Override print function to capture output
     const printFunc = `
@@ -42,7 +44,12 @@ export async function runLua(code: string): Promise<{ output: string; error?: st
     `;
     
     // Load the print override
-    lauxlib.luaL_dostring(L, to_jsstring(printFunc));
+    const overrideResult = lauxlib.luaL_dostring(L, to_jsstring(printFunc));
+    if (overrideResult !== 0) {
+      const errorMsg = lua.lua_tojsstring(L, -1);
+      lua.lua_close(L);
+      return { output: '', error: `Setup error: ${errorMsg}` };
+    }
     
     // Execute user code
     const result = lauxlib.luaL_dostring(L, to_jsstring(code));
@@ -55,15 +62,18 @@ export async function runLua(code: string): Promise<{ output: string; error?: st
     
     // Get captured output
     lauxlib.luaL_dostring(L, to_jsstring('return get_output()'));
-    output = lua.lua_tojsstring(L, -1) || 'Code executed successfully';
+    const output = lua.lua_tojsstring(L, -1);
     
     lua.lua_close(L);
     
-    return { output, error: undefined };
+    return { 
+      output: output && output.trim() ? output : 'Code executed successfully (no output)',
+      error: undefined 
+    };
   } catch (error: any) {
     return {
       output: '',
-      error: error.message || 'Execution error'
+      error: `Lua execution error: ${error.message || 'Unknown error'}`
     };
   }
 }

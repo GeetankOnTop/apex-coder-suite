@@ -12,6 +12,8 @@ import { Plus, FileCode2, Settings, Eye, EyeOff, Play, Save, FolderOpen, FilePlu
 import { toast } from "sonner";
 import { EditorSettings, defaultSettings } from "@/types/settings";
 import { secureStorage } from "@/lib/encryption";
+import { initializeFileHandler } from "@/lib/fileHandler";
+import { discordRPC } from "@/lib/discordRPC";
 import codeflowIcon from "@/assets/codeflow-icon.png";
 
 interface File {
@@ -98,6 +100,30 @@ const Index = () => {
     return () => mediaQuery.removeEventListener("change", handleThemeChange);
   }, []);
 
+  // Initialize file handler for native app
+  useEffect(() => {
+    initializeFileHandler(({ fileName, content, language }) => {
+      const newFile: File = {
+        id: Date.now().toString(),
+        name: fileName,
+        content,
+        language,
+      };
+      setFiles((prev) => [...prev, newFile]);
+      setActiveFileId(newFile.id);
+      toast.success(`Opened ${fileName} from file manager!`, {
+        description: "File opened successfully",
+      });
+    });
+
+    // Connect Discord RPC
+    discordRPC.connect();
+
+    return () => {
+      discordRPC.disconnect();
+    };
+  }, []);
+
   // Save settings to secureStorage
   useEffect(() => {
     secureStorage.setItem("codeflow-settings", JSON.stringify(settings));
@@ -120,6 +146,16 @@ const Index = () => {
   const activeFile = files.find((f) => f.id === activeFileId);
   const isHtmlFile = activeFile?.language === "html" || activeFile?.name.endsWith(".html");
   const canRun = activeFile?.language === "python" || activeFile?.language === "lua" || activeFile?.language === "luau";
+
+  // Update Discord RPC when active file changes
+  useEffect(() => {
+    if (activeFile) {
+      const lines = activeFile.content.split("\n").length;
+      discordRPC.updateActivity(activeFile.name, activeFile.language, lines);
+    } else {
+      discordRPC.clearActivity();
+    }
+  }, [activeFile]);
 
   const handleCodeChange = useCallback(
     (newContent: string) => {
@@ -193,6 +229,34 @@ const Index = () => {
     toast.success("File opened!", {
       description: fileName,
     });
+  };
+
+  const handleExternalCssFound = async (cssUrls: string[]) => {
+    // Auto-open external CSS files as tabs
+    for (const cssUrl of cssUrls) {
+      try {
+        const response = await fetch(cssUrl);
+        const content = await response.text();
+        const fileName = cssUrl.split('/').pop() || 'styles.css';
+        
+        // Check if file already exists
+        const exists = files.some(f => f.name === fileName);
+        if (!exists) {
+          const newFile: File = {
+            id: Date.now().toString() + Math.random(),
+            name: fileName,
+            content,
+            language: 'css',
+          };
+          setFiles((prev) => [...prev, newFile]);
+          toast.success(`Auto-opened ${fileName}`, {
+            description: "External CSS file loaded",
+          });
+        }
+      } catch (error) {
+        console.error(`Failed to load CSS: ${cssUrl}`, error);
+      }
+    }
   };
 
   return (
@@ -323,7 +387,10 @@ const Index = () => {
             </div>
             {showPreview && isHtmlFile && (
               <div className="w-1/2 h-full animate-in slide-in-from-right duration-300">
-                <HtmlPreview content={activeFile.content} />
+                <HtmlPreview 
+                  content={activeFile.content}
+                  onExternalCssFound={handleExternalCssFound}
+                />
               </div>
             )}
             {showRunner && canRun && (

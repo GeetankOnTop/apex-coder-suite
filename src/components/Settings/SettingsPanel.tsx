@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -68,7 +68,6 @@ export const SettingsPanel = ({
             
             onSettingsChange({
               ...settings,
-              fontFamily: fontName,
               customFonts: updatedFonts,
             });
             
@@ -84,9 +83,43 @@ export const SettingsPanel = ({
     input.click();
   };
 
+  const handleBackgroundUpload = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        try {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const imageURL = e.target?.result as string;
+            onSettingsChange({
+              ...settings,
+              backgroundImage: imageURL,
+            });
+            toast.success("Background image set!");
+          };
+          reader.readAsDataURL(file);
+        } catch (error) {
+          toast.error("Failed to load image");
+        }
+      }
+    };
+    input.click();
+  };
+
+  const handleRemoveBackground = () => {
+    onSettingsChange({
+      ...settings,
+      backgroundImage: "",
+    });
+    toast.success("Background image removed");
+  };
+
   return (
-    <div className="fixed inset-0 bg-editor-bg/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-xl shadow-soft w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-editor-bg/95 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="bg-card border border-border rounded-xl shadow-soft w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in duration-300">
         {/* Header */}
         <div className="p-6 border-b border-border flex items-center justify-between">
           <h2 className="text-2xl font-bold text-foreground">Editor Settings</h2>
@@ -106,17 +139,52 @@ export const SettingsPanel = ({
                 onSettingsChange({ ...settings, theme: value })
               }
             >
-              <SelectTrigger className="bg-input border-border">
+              <SelectTrigger className="bg-input border-border transition-all duration-300 hover:border-primary">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
                 {themes.map((theme) => (
-                  <SelectItem key={theme.value} value={theme.value}>
+                  <SelectItem key={theme.value} value={theme.value} className="transition-colors duration-200">
                     {theme.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <Separator />
+
+          {/* Background Image */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Background Image</Label>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleBackgroundUpload} 
+                variant="outline"
+                className="flex-1 gap-2 transition-all duration-300 hover:scale-105"
+              >
+                <Upload className="h-4 w-4" />
+                {settings.backgroundImage ? "Change Background" : "Upload Background"}
+              </Button>
+              {settings.backgroundImage && (
+                <Button 
+                  onClick={handleRemoveBackground} 
+                  variant="destructive"
+                  className="transition-all duration-300 hover:scale-105"
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+            {settings.backgroundImage && (
+              <div className="relative h-24 rounded-lg overflow-hidden border border-border animate-in fade-in zoom-in duration-300">
+                <img 
+                  src={settings.backgroundImage} 
+                  alt="Background preview" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
           </div>
 
           <Separator />
@@ -134,7 +202,7 @@ export const SettingsPanel = ({
                     onSettingsChange({ ...settings, fontFamily: value })
                   }
                 >
-                  <SelectTrigger className="flex-1 bg-input border-border">
+                  <SelectTrigger className="flex-1 bg-input border-border transition-all duration-300 hover:border-secondary">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
@@ -151,7 +219,12 @@ export const SettingsPanel = ({
                     ))}
                   </SelectContent>
                 </Select>
-                <Button onClick={handleFontUpload} variant="outline">
+                <Button 
+                  onClick={handleFontUpload} 
+                  variant="outline"
+                  className="gap-2 transition-all duration-300 hover:scale-105"
+                >
+                  <Upload className="h-4 w-4" />
                   Upload Font
                 </Button>
               </div>

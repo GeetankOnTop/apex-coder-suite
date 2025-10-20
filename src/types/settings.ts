@@ -8,6 +8,7 @@ export interface EditorSettings {
   fontSize: number;
   fontFamily: string;
   customFonts?: CustomFont[];
+  backgroundImage?: string;
   lineHeight: number;
   tabSize: number;
   smoothCursor: boolean;
@@ -26,6 +27,7 @@ export const defaultSettings: EditorSettings = {
   theme: "oneDark",
   fontSize: 14,
   fontFamily: "Fira Code",
+  backgroundImage: "",
   lineHeight: 1.6,
   tabSize: 2,
   smoothCursor: true,

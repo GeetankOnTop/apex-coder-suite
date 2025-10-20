@@ -55,7 +55,8 @@ export const createCustomTheme = (
   fontSize: number,
   fontFamily: string,
   lineHeight: number,
-  smoothCursor: boolean
+  smoothCursor: boolean,
+  backgroundImage?: string
 ) => {
   return [
     EditorView.theme({
@@ -63,6 +64,10 @@ export const createCustomTheme = (
         fontSize: `${fontSize}px`,
         fontFamily: fontFamily,
         height: "100%",
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
       },
       ".cm-content": {
         caretColor: "hsl(200 98% 65%)",
@@ -70,6 +75,7 @@ export const createCustomTheme = (
       ".cm-scroller": {
         lineHeight: lineHeight.toString(),
         fontFamily: "inherit",
+        backgroundColor: backgroundImage ? "transparent" : undefined,
       },
       ".cm-cursor, .cm-cursor-primary": {
         borderLeftColor: "hsl(200 98% 65%)",

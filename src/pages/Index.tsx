@@ -267,9 +267,9 @@ const Index = () => {
         <div className="relative flex items-center justify-between px-6 py-3">
           {/* Logo Section */}
           <div className={`flex items-center gap-3 transition-all duration-500 ${activeFile ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
-              <img src={codeflowIcon} alt="CodeFlow" className="relative w-9 h-9" />
+            <div className="relative animate-in zoom-in duration-500">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse"></div>
+              <img src={codeflowIcon} alt="CodeFlow" className="relative w-9 h-9 transition-transform duration-300 hover:scale-110" />
             </div>
             <span className="font-bold text-xl bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-in fade-in slide-in-from-left-3 duration-700">
               CodeFlow
@@ -277,13 +277,13 @@ const Index = () => {
           </div>
           
           {/* Action Buttons */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-right-3 duration-500">
             {activeFile && (
               <>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 hover:bg-primary/10 hover:text-primary transition-smooth"
+                  className="h-9 w-9 hover:bg-primary/10 hover:text-primary transition-smooth hover:scale-110 active:scale-95"
                   onClick={handleSave}
                   title="Save (Ctrl+S)"
                 >
@@ -292,7 +292,7 @@ const Index = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 hover:bg-secondary/10 hover:text-secondary transition-smooth"
+                  className="h-9 w-9 hover:bg-secondary/10 hover:text-secondary transition-smooth hover:scale-110 active:scale-95"
                   onClick={() => setShowSaveAsDialog(true)}
                   title="Save As"
                 >
@@ -303,7 +303,7 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-accent/10 hover:text-accent transition-smooth"
+              className="h-9 w-9 hover:bg-accent/10 hover:text-accent transition-smooth hover:scale-110 active:scale-95"
               onClick={() => setShowOpenFileDialog(true)}
               title="Open File"
             >
@@ -313,7 +313,7 @@ const Index = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 hover:bg-primary/10 hover:text-primary transition-smooth"
+                className="h-9 w-9 hover:bg-primary/10 hover:text-primary transition-smooth hover:scale-110 active:scale-95 animate-in fade-in zoom-in duration-300"
                 onClick={() => setShowRunner(!showRunner)}
                 title={showRunner ? "Hide Runner" : "Show Runner"}
               >
@@ -324,7 +324,7 @@ const Index = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 hover:bg-secondary/10 hover:text-secondary transition-smooth"
+                className="h-9 w-9 hover:bg-secondary/10 hover:text-secondary transition-smooth hover:scale-110 active:scale-95 animate-in fade-in zoom-in duration-300"
                 onClick={() => setShowPreview(!showPreview)}
                 title={showPreview ? "Hide Preview" : "Show Preview"}
               >
@@ -335,7 +335,7 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-accent/10 hover:text-accent transition-smooth"
+              className="h-9 w-9 hover:bg-accent/10 hover:text-accent transition-smooth hover:scale-110 active:scale-95"
               onClick={() => setShowNewFileDialog(true)}
               title="New File"
             >
@@ -344,7 +344,7 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 hover:bg-muted/50 transition-smooth"
+              className="h-9 w-9 hover:bg-muted/50 transition-smooth hover:scale-110 hover:rotate-90 active:scale-95"
               onClick={() => setShowSettings(true)}
               title="Settings"
             >
@@ -356,7 +356,7 @@ const Index = () => {
 
       {/* File Tabs - Stunning Design */}
       {files.length > 0 && (
-        <div className="relative bg-card/80 border-b border-border/50 backdrop-blur-md overflow-x-auto">
+        <div className="relative bg-card/80 border-b border-border/50 backdrop-blur-md overflow-x-auto animate-in slide-in-from-top duration-300">
           <div className="absolute inset-0 bg-gradient-accent opacity-5"></div>
           <div className="relative flex items-center gap-1 px-4 py-1">
             {files.map((file) => (
@@ -426,10 +426,10 @@ const Index = () => {
               <p className="text-muted-foreground mb-10 max-w-xl text-lg animate-in fade-in slide-in-from-bottom-3 duration-700 delay-300">
                 Professional code editor with Python & Lua execution, live HTML preview, and comprehensive autocomplete
               </p>
-              <div className="flex gap-4 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-500">
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-center animate-in fade-in slide-in-from-bottom-2 duration-700 delay-500">
                 <Button
                   onClick={() => setShowNewFileDialog(true)}
-                  className="gap-2 text-base px-6 py-6 shadow-glow hover:shadow-[0_6px_40px_hsl(200_98%_55%/0.35)] transition-smooth"
+                  className="gap-2 text-base px-6 py-6 shadow-glow hover:shadow-[0_6px_40px_hsl(200_98%_55%/0.35)] transition-smooth hover:scale-105 active:scale-95"
                   size="lg"
                 >
                   <FileCode2 className="h-5 w-5" />
@@ -438,20 +438,20 @@ const Index = () => {
                 <Button
                   onClick={() => setShowOpenFileDialog(true)}
                   variant="outline"
-                  className="gap-2 text-base px-6 py-6 bg-card/50 backdrop-blur-sm hover:bg-accent/20 hover:border-accent transition-smooth"
+                  className="gap-2 text-base px-6 py-6 bg-card/50 backdrop-blur-sm hover:bg-accent/20 hover:border-accent transition-smooth hover:scale-105 active:scale-95"
                   size="lg"
                 >
                   <FolderOpen className="h-5 w-5" />
                   Open File
                 </Button>
               </div>
-              <div className="mt-12 grid grid-cols-2 gap-4 text-sm text-muted-foreground max-w-lg animate-in fade-in slide-in-from-bottom duration-700 delay-700">
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-primary backdrop-blur-sm border border-primary/20">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-muted-foreground max-w-lg animate-in fade-in slide-in-from-bottom duration-700 delay-700">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-primary backdrop-blur-sm border border-primary/20 transition-all duration-300 hover:scale-105 hover:border-primary/40">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                   <span>17+ languages</span>
                 </div>
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-accent backdrop-blur-sm border border-secondary/20">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-accent backdrop-blur-sm border border-secondary/20 transition-all duration-300 hover:scale-105 hover:border-secondary/40">
+                  <div className="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
                   <span>Python & Lua runners</span>
                 </div>
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-primary backdrop-blur-sm border border-accent/20">

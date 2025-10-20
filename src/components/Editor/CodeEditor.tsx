@@ -36,7 +36,8 @@ export const CodeEditor = ({ value, onChange, language, settings }: CodeEditorPr
       settings.fontSize,
       settings.fontFamily,
       settings.lineHeight,
-      settings.smoothCursor
+      settings.smoothCursor,
+      settings.backgroundImage
     );
 
     const extensions = [
